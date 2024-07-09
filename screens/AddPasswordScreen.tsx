@@ -15,8 +15,13 @@ type Props = {
 const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
   const [website, setWebsite] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  
   const [error, setError] = useState<string | null>(null);
-
+  const [showAdditionalFields, setShowAdditionalFields] = useState(true);
+  const toggleAdditionalFields = () => {
+    setShowAdditionalFields(!showAdditionalFields);
+  };
   const savePassword = async () => {
     if (!website.trim()) {
         setError('Website name cannot be empty.');
@@ -49,6 +54,22 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
           placeholderTextColor={Colors.muted}
         />
       </View>
+      <TouchableOpacity style={styles.arrowContainer} onPress={toggleAdditionalFields}>
+        <Text style={styles.arrow}>{!showAdditionalFields ? '+' : '-'}</Text>
+      </TouchableOpacity>
+      
+      {showAdditionalFields && (
+         <View style={styles.inputContainer}>
+         <Text style={styles.label}>Username</Text>
+         <TextInput
+           placeholder="Enter username"
+           value={username}
+           onChangeText={setUsername}
+           style={styles.input}
+           placeholderTextColor={Colors.muted}
+         />
+       </View>
+      )}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <TextInput
@@ -135,6 +156,13 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  arrowContainer: {
+    marginTop: 0,
+    alignItems:'flex-end',
+  },
+  arrow: {
+    fontSize: 30,
   },
 });
 

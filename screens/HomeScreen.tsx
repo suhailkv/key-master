@@ -6,6 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useFocusEffect } from '@react-navigation/native';
 import Colors from '../colors';
+import * as Clipboard from 'expo-clipboard';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -34,7 +35,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       loadPasswords();
     }, [])
   );
-
+  const getPasswordForIndex = (index:number)=> {
+    return passwords.filter((item, idx) => idx === index);
+  }
   const togglePasswordVisibility = (index: number) => {
     const updatedPasswords = passwords.map((item, idx) => {
       if (idx === index) {
@@ -44,14 +47,21 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     });
     setPasswords([...updatedPasswords]);
   };
+  const copyPassword = async (index:number) => {
+    const pass = getPasswordForIndex(index)
+    await Clipboard.setStringAsync(pass[0].password);
 
+  }
   const renderItem = ({ item, index }: { item: PasswordItem; index: number }) => (
     <View style={styles.passwordItem}>
       <View>
         <Text style={styles.website}>{item.website}</Text>
         <Text style={styles.password}>{item.isVisible ? item.password : '*******'}</Text>
       </View>
-      <TouchableOpacity onPress={() => togglePasswordVisibility(index)}>
+      <TouchableOpacity style={styles.clipboardContainer} onPress={()=>copyPassword(index)}>
+        <Ionicons name="clipboard" size={24} />
+      </TouchableOpacity>
+      <TouchableOpacity   onPress={() => togglePasswordVisibility(index)}>
         <Ionicons name={item.isVisible ? 'eye-off' : 'eye'} size={24} color={Colors.black} />
       </TouchableOpacity>
     </View>
@@ -119,6 +129,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
+  clipboardContainer :{
+    alignItems:'flex-end',
+    flex:1,
+    paddingRight:3
+  }
 });
 
 export default HomeScreen;
