@@ -5,7 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../colors';
-
+import FadingContainer from '../components/FadingCont'
 type AddPasswordScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddPassword'>;
 
 type Props = {
@@ -15,8 +15,18 @@ type Props = {
 const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
   const [website, setWebsite] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const savePassword = async () => {
+    if (!website.trim()) {
+        setError('Website name cannot be empty.');
+        return;
+      }
+  
+      if (!password.trim()) {
+        setError('Password cannot be empty.');
+        return;
+      }
     const storedPasswords = await AsyncStorage.getItem('passwords');
     const passwords = storedPasswords ? JSON.parse(storedPasswords) : [];
     passwords.push({ website, password, isVisible: false });
@@ -26,6 +36,9 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+         {error && (
+        <FadingContainer message={error} timeout={5000} errFn={setError} />
+      )}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Website</Text>
         <TextInput
@@ -105,6 +118,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 10,
+  },
+
+  errorContainer:   {
+    position: 'absolute',
+    top: 20, // Adjust as needed
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f44336',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  errorText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

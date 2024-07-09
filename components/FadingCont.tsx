@@ -2,10 +2,12 @@ import { View, Text, StyleSheet } from 'react-native';
 
 interface FadingContainerProps {
   message: string | null;
+  timeout:number
+  errFn : Function
 }
 
-const FadingContainer: React.FC<FadingContainerProps> = ({ message }) => {
- 
+const FadingContainer: React.FC<FadingContainerProps> = ({ message ,timeout,errFn}) => {
+ setTimeout(()=>errFn(null),timeout)
 return (
   message &&
     <View style={styles.errorContainer}>
