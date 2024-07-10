@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+    zIndex:1000
   },
   errorText: {
     color: '#fff',
