@@ -1,15 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef} from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
 import { useFocusEffect } from '@react-navigation/native';
-import Colors from '../../colors';
 import * as Clipboard from 'expo-clipboard';
+import Colors from '../../colors';
 import FadingContainer from '../../components/FadingCont';
 import styles from './styles';
 import { getAllPasswords ,getPasswordById} from '../../libs/passwordManager';
-
+import CONSTANTS from '../../constants';
 type Props = {
     navigation: StackNavigationProp<RootStackParamList, 'ViewPasswords'>;
 };
@@ -26,6 +26,7 @@ const ViewPassword: React.FC<Props> = ({ navigation }) => {
     const [passwords, setPasswords] = useState<PasswordItem[]>([]);
     const [info, setInfo] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+        const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({});
 
     const loadPasswords = async () => {
         try {
@@ -34,7 +35,6 @@ const ViewPassword: React.FC<Props> = ({ navigation }) => {
         } catch (error) {
             setError('Something went wrong')
         }
-        
     };
 
     useFocusEffect(
@@ -43,12 +43,29 @@ const ViewPassword: React.FC<Props> = ({ navigation }) => {
         }, [])
     );
 
-    const togglePasswordVisibility = (index: string) => {
-        const updatedPasswords = passwords.map((item, idx) => {
-            if (idx == parseInt(index)) item.isVisible = !item.isVisible;
-            return item;
+    const togglePasswordVisibility = async (index: string,isUser:boolean = false) => {
+      
+        if (timeoutRef.current[index]) {
+            clearTimeout(timeoutRef.current[index]);
+            timeoutRef.current[index] = null;
+        }
+        const pass = await getPasswordById(index)
+        
+        pass && setPasswords(passwords=> {
+            const stateIndex = passwords.findIndex(entry=> entry.id == index );
+            
+            if (stateIndex !== -1) {
+                const updatedPasswords = [...passwords];
+                updatedPasswords[stateIndex] = {
+                    ...updatedPasswords[stateIndex],
+                    password: !passwords[stateIndex].isVisible ? pass.password : '*******',
+                    isVisible: !passwords[stateIndex].isVisible
+                };
+                isUser && updatedPasswords[stateIndex].isVisible && (timeoutRef.current[index] =setTimeout(()=> updatedPasswords[stateIndex].isVisible && togglePasswordVisibility(index),CONSTANTS.passwordShowTime))
+                return updatedPasswords;
+            }
+            return passwords
         });
-        setPasswords([...updatedPasswords]);
     };
 
     const copyPassword = async (index:string) => {
@@ -67,10 +84,10 @@ const ViewPassword: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.website}>{item.website}</Text>
             <Text style={styles.password}>{item.isVisible ? item.password : '*******'}</Text>
         </View>
-        <TouchableOpacity style={styles.clipboardContainer} onPress={()=>copyPassword(`${index}`)}>
+        <TouchableOpacity style={styles.clipboardContainer} onPress={()=>copyPassword(`${item.id}`)}>
             <Ionicons name="clipboard" size={24} />
         </TouchableOpacity>
-        <TouchableOpacity   onPress={() => togglePasswordVisibility(`${index}`)}>
+        <TouchableOpacity   onPress={() => togglePasswordVisibility(`${item.id}`,true)}>
             <Ionicons name={item.isVisible ? 'eye-off' : 'eye'} size={24} color={Colors.black} />
         </TouchableOpacity>
         </View>
