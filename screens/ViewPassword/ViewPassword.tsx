@@ -95,7 +95,7 @@ const ViewPassword: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            {info && <FadingContainer message={info} timeout={5000} errFn={setInfo}/>}
+            {info && <FadingContainer message={info} timeout={5000} errFn={setInfo} containerStyle={{backgroundColor:'green'}}/>}
             {error && <FadingContainer message={error} timeout={5000} errFn={setError}/>}
 
         <FlatList

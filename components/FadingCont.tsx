@@ -1,17 +1,19 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet,StyleProp,ViewStyle,TextStyle } from 'react-native';
 
 interface FadingContainerProps {
   message: string | null;
   timeout:number
   errFn : Function
+  containerStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
-const FadingContainer: React.FC<FadingContainerProps> = ({ message ,timeout,errFn}) => {
+const FadingContainer: React.FC<FadingContainerProps> = ({ message ,timeout,errFn,containerStyle,textStyle}) => {
  setTimeout(()=>errFn(null),timeout)
 return (
   message &&
-    <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{message}</Text>
+    <View style={[styles.errorContainer, containerStyle]}>
+        <Text style={[styles.errorText, textStyle]}>{message}</Text>
     </View>
 )
 
