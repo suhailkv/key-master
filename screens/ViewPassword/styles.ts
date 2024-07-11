@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
       clipboardContainer :{
-        alignItems:'flex-end',
-        flex:1,
+        position:'absolute',
+        right:50,
         paddingRight:3
     }
 })

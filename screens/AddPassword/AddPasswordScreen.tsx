@@ -3,22 +3,26 @@ import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import Colors from '../../colors';
 import FadingContainer from '../../components/FadingCont'
-import * as SecureStore from 'expo-secure-store';
 import {savePassword as savePass,getAllPasswords} from '../../libs/passwordManager'
+import {generateStrongPassword} from '../../libs/generateRandomPass'
 import styles from './styles';
+import { RouteProp } from '@react-navigation/native';
 type AddPasswordScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddPassword'>;
 
 type Props = {
   navigation: AddPasswordScreenNavigationProp;
+  route: RouteProp<RootStackParamList, 'AddPassword'>;
+
 };
 
-const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
+const AddPasswordScreen: React.FC<Props> = ({ navigation,route }) => {
   const [website, setWebsite] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAdditionalFields, setShowAdditionalFields] = useState(false);
   const toggleAdditionalFields = () => {
@@ -28,6 +32,7 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
     if(!_validateEntry()) return
     try {
       await savePass({password,website,username})
+      await Clipboard.setStringAsync(password);
     } catch (error) {
       console.log(error);
       setError('Something went wrong');
@@ -35,6 +40,14 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
     }
     navigation.goBack();
   };
+  const generatePassword  = async () => {
+    try {
+      setPassword(await generateStrongPassword(16));
+    } catch (error) {
+      setError('Something went wrong')
+    }
+  }
+
   function _validateEntry() {
     if (!website.trim()) {
         setError('Website name cannot be empty.');
@@ -83,11 +96,22 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation }) => {
           placeholder="Enter password"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
+          secureTextEntry={!isPasswordVisible}
           style={styles.input}
           placeholderTextColor={Colors.muted}
         />
       </View>
+      <TouchableOpacity onPress={()=> setIsPasswordVisible(val=>!val)} style={styles.eyeButton}>
+          <Ionicons
+            name={isPasswordVisible ? 'eye-off' : 'eye'}
+            size={24}
+            color="#999"
+          />
+        </TouchableOpacity>
+      <TouchableOpacity style={{...styles.saveButton,marginBottom:10,backgroundColor:'green'}} onPress={generatePassword}>
+        <Ionicons name="construct-sharp" size={24} color={Colors.white} />
+        <Text style={styles.saveButtonText}>Generate Password</Text>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.saveButton} onPress={savePassword}>
         <Ionicons name="save-outline" size={24} color={Colors.white} />
         <Text style={styles.saveButtonText}>Save</Text>

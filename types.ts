@@ -1,6 +1,6 @@
 export type RootStackParamList = {
-    ViewPasswords: undefined;
-    AddPassword: undefined;
+    ViewPasswords: { info?: string };
+    AddPassword:  undefined;
 };
 export interface PasswordEntry {
     website: string;

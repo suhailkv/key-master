@@ -32,6 +32,7 @@ const styles = StyleSheet.create( {
         borderRadius: 5,
         paddingHorizontal: 10,
         color: Colors.dark,
+        paddingRight:40
     },
     saveButton: {
         flexDirection: 'row',
@@ -58,6 +59,14 @@ const styles = StyleSheet.create( {
     },
     arrow: {
         fontSize: 30,
-    }
+    },
+    eyeButton: {
+        padding: 5,
+        position:'relative',
+        top:-70,
+        right:-300,
+        margin:0,
+        zIndex:1000
+      },
 })
 export default styles
