@@ -29,7 +29,7 @@ const getAllPasswords = async (): Promise<StoredPassword[]> => {
                 passwords.push(securePasswordEntry);
             }
         }
-        return passwords;
+        return passwords.sort((a,b)=>parseInt(b.id) - parseInt(a.id))
     } catch (error) {
         throw Error()
     }

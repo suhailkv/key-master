@@ -52,6 +52,7 @@ const styles = StyleSheet.create( {
         fontSize: 18,
         fontWeight: 'bold',
         marginLeft: 10,
+        marginRight: 10,
     },
     arrowContainer: {
         marginTop: 0,

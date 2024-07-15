@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: Colors.dark,
+        marginBottom:5
       },
       password: {
         fontSize: 14,

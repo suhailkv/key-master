@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useRef} from 'react';
+import React, { useState,useEffect, useCallback, useRef} from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
 import { useFocusEffect } from '@react-navigation/native';
+import { RouteProp } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import Colors from '../../colors';
 import FadingContainer from '../../components/FadingCont';
@@ -12,6 +13,7 @@ import { getAllPasswords ,getPasswordById} from '../../libs/passwordManager';
 import CONSTANTS from '../../constants';
 type Props = {
     navigation: StackNavigationProp<RootStackParamList, 'ViewPasswords'>;
+    route: RouteProp<RootStackParamList, 'ViewPasswords'>;
 };
 
 type PasswordItem = {
@@ -22,12 +24,12 @@ type PasswordItem = {
     username ? :string;
 };
 
-const ViewPassword: React.FC<Props> = ({ navigation }) => {
+const ViewPassword: React.FC<Props> = ({ navigation ,route}) => {
+    
     const [passwords, setPasswords] = useState<PasswordItem[]>([]);
     const [info, setInfo] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-        const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({});
-
+    const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({});
     const loadPasswords = async () => {
         try {
             let storedPasswords:PasswordItem[] = (await getAllPasswords()).map(passObj=> {return {...passObj,isVisible:false}});
@@ -81,7 +83,7 @@ const ViewPassword: React.FC<Props> = ({ navigation }) => {
     const renderItem = ({ item, index }: { item: PasswordItem; index: number }) => (
         <View style={styles.passwordItem}>
         <View>
-            <Text style={styles.website}>{item.website}</Text>
+            <Text textBreakStrategy ={'balanced'} numberOfLines={1} ellipsizeMode = {'tail'} style={styles.website}>{item.website}</Text>
             <Text style={styles.password}>{item.isVisible ? item.password : '*******'}</Text>
         </View>
         <TouchableOpacity style={styles.clipboardContainer} onPress={()=>copyPassword(`${item.id}`)}>
@@ -99,6 +101,7 @@ const ViewPassword: React.FC<Props> = ({ navigation }) => {
             {error && <FadingContainer message={error} timeout={5000} errFn={setError}/>}
 
         <FlatList
+            style={{maxHeight:630}}
             data={passwords}
             keyExtractor={(_, index) => index.toString()}
             renderItem={renderItem}
