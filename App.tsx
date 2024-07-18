@@ -3,14 +3,19 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/ViewPassword/ViewPassword';
-import Authentication from './screens/HomeScreen/HomeScreen';
+import Authentication from './screens/HomeScreen/Authentication';
 import AddPasswordScreen from './screens/AddPassword/AddPasswordScreen';
 import { RootStackParamList } from './types';
 import { View,StyleSheet ,Text,Button, TouchableOpacity} from 'react-native';
 import styles2 from './screens/AddPassword/styles';
+import styles3 from './screens/ViewPassword/styles';
+import Colors from './colors';
+import { Ionicons } from '@expo/vector-icons';
+import {clearAuthToken} from './libs/tokenHandler'
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
+ 
     return (
         <NavigationContainer>
             <Stack.Navigator initialRouteName="Authentication">
@@ -24,10 +29,11 @@ export default function App() {
             headerRight: () => (
                 <>
               
-              <TouchableOpacity style={{...styles2.saveButton,backgroundColor:'red'}} onPress={() => {
-                  navigation.navigate('Authentication');
+              <TouchableOpacity style={{...styles2.saveButton,...styles3.addButton,position:'absolute',top:9,right:15,backgroundColor:'red'}} onPress={() => {
+                  clearAuthToken()
+                  navigation.navigate('Authentication')
                 }}>
-        <Text style={styles2.saveButtonText}>Logout</Text>
+            <Ionicons  name="log-out-outline" size={24} color={Colors.white} />
       </TouchableOpacity>
                 </>
             ),
