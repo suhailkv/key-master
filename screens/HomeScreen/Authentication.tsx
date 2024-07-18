@@ -5,7 +5,6 @@ import { getMasterPassword, saveMasterPassword } from '../../libs/MasterPass';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
-import styles2 from '../AddPassword/styles'
 import {validatePassword} from '../../utils/utils'
 import FadingContainer from '../../components/FadingCont';
 import { Ionicons } from '@expo/vector-icons';

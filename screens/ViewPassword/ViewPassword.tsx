@@ -1,5 +1,5 @@
 import React, { useState,useEffect, useCallback, useRef} from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
@@ -9,8 +9,10 @@ import * as Clipboard from 'expo-clipboard';
 import Colors from '../../colors';
 import FadingContainer from '../../components/FadingCont';
 import styles from './styles';
-import { getAllPasswords ,getPasswordById} from '../../libs/passwordManager';
+import { deleteAll, getAllPasswords ,getPasswordById,deleteEntry} from '../../libs/passwordManager';
 import CONSTANTS from '../../constants';
+import { initializeSession } from '../../libs/tokenHandler';
+import SwipeCard from '../../components/SwipeComp';
 type Props = {
     navigation: StackNavigationProp<RootStackParamList, 'ViewPasswords'>;
     route: RouteProp<RootStackParamList, 'ViewPasswords'>;
@@ -31,17 +33,27 @@ const ViewPassword: React.FC<Props> = ({ navigation ,route}) => {
     const [error, setError] = useState<string | null>(null);
     const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({});
     const loadPasswords = async () => {
-        try {
             let storedPasswords:PasswordItem[] = (await getAllPasswords()).map(passObj=> {return {...passObj,isVisible:false}});
             if (storedPasswords) setPasswords(storedPasswords); 
-        } catch (error) {
-            setError('Something went wrong')
-        }
     };
 
     useFocusEffect(
         useCallback(() => {
-            loadPasswords();
+            async function init(){
+                try {
+                    // deleteAll()
+                    if(!(await initializeSession()).result) {setError('Something went wrong');return}
+                    loadPasswords();
+                    BackHandler.addEventListener('hardwareBackPress', () => {
+                        BackHandler.exitApp(); 
+                        return true; 
+                      });
+                } catch (error) {
+                    console.log(error);
+                    setError('Something went wrong')
+                }
+            }
+            init()
         }, [])
     );
 
@@ -79,20 +91,33 @@ const ViewPassword: React.FC<Props> = ({ navigation ,route}) => {
             setError('Something went wrong')
         }
     }
-
+    const handleSwipeRight = async (id : string) => {
+        try {
+            await deleteEntry(id)
+            setPasswords((pass : PasswordItem[])=>{
+                return pass.filter((p)=>p.id != id)
+            })
+            setInfo('Successfully deleted')
+        } catch (error) {
+            setError('Something went wrong')
+        }
+    }
+    const handleSwipeLeft = (id:string) => {
+        setPasswords(passwords)
+    }
     const renderItem = ({ item, index }: { item: PasswordItem; index: number }) => (
-        <View style={styles.passwordItem}>
-        <View>
-            <Text textBreakStrategy ={'balanced'} numberOfLines={1} ellipsizeMode = {'tail'} style={styles.website}>{item.website}</Text>
-            <Text style={styles.password}>{item.isVisible ? item.password : '*******'}</Text>
-        </View>
-        <TouchableOpacity style={styles.clipboardContainer} onPress={()=>copyPassword(`${item.id}`)}>
-            <Ionicons name="clipboard" size={24} />
-        </TouchableOpacity>
-        <TouchableOpacity   onPress={() => togglePasswordVisibility(`${item.id}`,true)}>
-            <Ionicons name={item.isVisible ? 'eye-off' : 'eye'} size={24} color={Colors.black} />
-        </TouchableOpacity>
-        </View>
+        <SwipeCard style={styles.passwordItem} data={item} onSwipeLeft={()=>handleSwipeLeft(item.id)} onSwipeRight={()=>handleSwipeRight(item.id)}>
+            <View>
+                <Text style={styles.website}>{item.website}</Text>
+                <Text style={styles.password}>{item.isVisible ? item.password : '*******'}</Text>
+            </View>
+            <TouchableOpacity style={styles.clipboardContainer} onPress={() => copyPassword(`${item.id}`)}>
+                <Ionicons name="clipboard" size={24} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => togglePasswordVisibility(`${item.id}`, true)}>
+                <Ionicons name={item.isVisible ? 'eye-off' : 'eye'} size={24} color={Colors.black} />
+            </TouchableOpacity>
+        </SwipeCard>
     );
 
     return (
@@ -100,18 +125,10 @@ const ViewPassword: React.FC<Props> = ({ navigation ,route}) => {
             {info && <FadingContainer message={info} timeout={5000} errFn={setInfo} containerStyle={{backgroundColor:'green'}}/>}
             {error && <FadingContainer message={error} timeout={5000} errFn={setError}/>}
 
-        <FlatList
-            style={{maxHeight:630}}
-            data={passwords}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={renderItem}
-        />
-        <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => navigation.navigate('AddPassword')}
-        >
-            <Ionicons name="add" size={24} color={Colors.white} />
-        </TouchableOpacity>
+            <FlatList style={{maxHeight:630}} data={passwords} keyExtractor={(_, index) => index.toString()} renderItem={renderItem} />
+            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddPassword')} >
+                <Ionicons name="add" size={24} color={Colors.white} />
+            </TouchableOpacity>
         </View>
     );
 };

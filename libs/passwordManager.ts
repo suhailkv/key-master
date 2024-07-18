@@ -64,7 +64,7 @@ async function updateEntry({id, password, website,username}: StoredPassword): Pr
         }
     } catch (error) {
         console.error('Error updating entry:', error);
-        throw error;
+        throw Error();
     }
 }
 async function deleteAll():Promise<boolean> {
