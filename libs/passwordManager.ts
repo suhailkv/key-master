@@ -1,15 +1,17 @@
 import * as SecureStore from 'expo-secure-store';
 import {PasswordEntry,StoredPassword} from '../types'
 
-const savePassword = async ({password, website, username}:PasswordEntry): Promise<string> => {
+const savePassword = async ({id,password, website, username}:StoredPassword): Promise<string> => {
     try {
-        const id = Date.now().toString();
-        const entry: StoredPassword = { id, website ,username, password };
-        SecureStore.setItem(id, JSON.stringify(entry));
+        let ts;
+        id ? ts = id:ts = Date.now().toString();
+        const entry: StoredPassword = { id:ts, website ,username, password };
+        SecureStore.setItem(ts, JSON.stringify(entry));
+        if(id == ts) return id
         const keys:string[] = await _getAllKeys();
-        keys.push(id);
+        keys.push(ts);
         await SecureStore.setItemAsync('password_keys', JSON.stringify(keys));
-        return id;
+        return ts;
     } catch (error) {
         throw Error()
     }
@@ -29,7 +31,10 @@ const getAllPasswords = async (): Promise<StoredPassword[]> => {
                 passwords.push(securePasswordEntry);
             }
         }
-        return passwords.sort((a,b)=>parseInt(b.id) - parseInt(a.id))
+        return passwords.sort((a,b)=>{
+            if(b.id && a.id) return parseInt(b.id) - parseInt(a.id)
+            else return 1
+        })
     } catch (error) {
         throw Error()
     }
@@ -38,7 +43,7 @@ const getAllPasswords = async (): Promise<StoredPassword[]> => {
 const getPasswordById = async (id: string): Promise<PasswordEntry | null> => {
     try {
         const entryJson = await SecureStore.getItemAsync(id);
-        const entry = entryJson ? JSON.parse(entryJson) : null
+        const entry:PasswordEntry = entryJson ? JSON.parse(entryJson) : null
         return entry
     } catch (error) {
         throw Error()
@@ -54,7 +59,7 @@ async function deleteEntry(id: string): Promise<void> {
   }
 async function updateEntry({id, password, website,username}: StoredPassword): Promise<void> {
     try {
-        const entryString = await SecureStore.getItemAsync(id);
+        const entryString = id && await SecureStore.getItemAsync(id);
         if (entryString) {
             const entry: PasswordEntry = JSON.parse(entryString);
             const updatedEntry: PasswordEntry = {...entry,password,website,username};

@@ -1,17 +1,21 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Animated, PanResponder, StyleSheet, Text, ViewStyle } from 'react-native';
+import { PasswordItem } from '../types';
 
 interface SwipeCardProps {
-    data: any;
+    data: PasswordItem;
     children: React.ReactNode;
-    onSwipeLeft: () => void;
+    onSwipeLeft: (pass:PasswordItem) => void;
     onSwipeRight: () => void;
     style?: ViewStyle;
 }
 
 const SwipeCard: React.FC<SwipeCardProps> = ({ data, children, onSwipeLeft, onSwipeRight, style }) => {
+    const dataRef = useRef(data);
+    useEffect(()=>{
+        dataRef.current = data; 
+    },[data])
     const position = useRef(new Animated.ValueXY()).current; 
-
     const panResponder = useRef(
         PanResponder.create({
             onMoveShouldSetPanResponder: () => true,
@@ -22,13 +26,10 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ data, children, onSwipeLeft, onSw
                     Animated.timing(position, { toValue: { x: 500, y: 0 }, duration: 200, useNativeDriver: false }).start();
                 } 
                 else if (gesture.dx < -150) { 
-                    onSwipeLeft();
+                    onSwipeLeft(dataRef.current);
                     Animated.timing(position, { toValue: { x: -500, y: 0 }, duration: 200, useNativeDriver: false }).start();
                 } 
-                else {
-                // Reset position if not swiped far enough
-                    Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
-                }
+                Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
             },
         })
     ).current;

@@ -1,6 +1,6 @@
 export type RootStackParamList = {
     ViewPasswords: { info?: string };
-    AddPassword:  undefined;
+    AddPassword:  PasswordItem | undefined;
     Authentication:undefined
 };
 export interface PasswordEntry {
@@ -9,10 +9,18 @@ export interface PasswordEntry {
     password: string;
 }
 export interface StoredPassword {
-    id: string;
+    id: string | undefined;
     website: string;
     username?: string;
     password: string;
 }
+export type PasswordItem = {
+    id:string | undefined
+    website: string;
+    password: string;
+    isVisible: boolean;
+    username? :string;
+};
+
 
   

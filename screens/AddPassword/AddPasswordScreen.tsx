@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
@@ -22,16 +22,31 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation,route }) => {
   const [website, setWebsite] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [ts,setTs] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAdditionalFields, setShowAdditionalFields] = useState(false);
+  const [editMode,setEditMode] = useState(false)
+  
+  const editData = route.params;
+
+    useEffect(()=>{
+      if(editData !== undefined) {
+        
+        setEditMode(true)
+        setWebsite(editData.website);
+        editData.username && setUsername(editData.username)
+        editData.id && setTs(editData.id)
+      }
+
+    },[editMode])
   const toggleAdditionalFields = () => {
     setShowAdditionalFields(!showAdditionalFields);
   };
-  const savePassword = async () => {
+  const savePassword = async (id:string | undefined) => {
     if(!_validateEntry()) return
     try {
-      await savePass({password,website,username})
+      await savePass({id,password,website,username})
       await Clipboard.setStringAsync(password);
     } catch (error) {
       console.log(error);
@@ -74,11 +89,11 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation,route }) => {
           placeholderTextColor={Colors.muted}
         />
       </View>
-      <TouchableOpacity style={styles.arrowContainer} onPress={toggleAdditionalFields}>
+      {/* <TouchableOpacity style={styles.arrowContainer} onPress={toggleAdditionalFields}>
         <Text style={styles.arrow}>{!showAdditionalFields ? '+' : '-'}</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       
-      {showAdditionalFields && (
+      {/* {showAdditionalFields && ( */}
          <View style={styles.inputContainer}>
          <Text style={styles.label}>Username</Text>
          <TextInput
@@ -89,7 +104,7 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation,route }) => {
            placeholderTextColor={Colors.muted}
          />
        </View>
-      )}
+      {/* )} */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <TextInput
@@ -112,9 +127,9 @@ const AddPasswordScreen: React.FC<Props> = ({ navigation,route }) => {
         <Ionicons name="construct-sharp" size={24} color={Colors.white} />
         <Text style={styles.saveButtonText}>Generate Password</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.saveButton} onPress={savePassword}>
+      <TouchableOpacity style={!editMode ? styles.saveButton : {...styles.saveButton,backgroundColor:'orange'}} onPress={()=>{savePassword(editMode ? ts : '')}}>
         <Ionicons name="save-outline" size={24} color={Colors.white} />
-        <Text style={styles.saveButtonText}>Save</Text>
+        <Text style={styles.saveButtonText}>{editMode ? 'Update':'Save'}</Text>
       </TouchableOpacity>
     </View>
   );

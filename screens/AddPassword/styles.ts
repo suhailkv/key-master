@@ -69,5 +69,18 @@ const styles = StyleSheet.create( {
         margin:0,
         zIndex:1000
       },
+      updateButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'orange',
+        borderRadius: 10,
+        height: 50,
+        shadowColor: Colors.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 5,
+      }
 })
 export default styles
