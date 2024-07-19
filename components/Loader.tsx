@@ -4,19 +4,22 @@ import { checkDeviceSecurity } from '../libs/securityCheck';
 import FadingContainer from './FadingCont';
 interface LoadingScreenProps {
     isLoading: Function;
+    init?:boolean
+    timeout? : number;
+    customMessage?:string
 }
-const LoadingScreen: React.FC<LoadingScreenProps> = ({isLoading}) => {
+const LoadingScreen: React.FC<LoadingScreenProps> = ({isLoading,timeout=1000,init=true,customMessage='Something went wrong.Restart Application'}) => {
     const [error,setError] = useState<string>('')
     useEffect(()=> {
         async function checkSecurity(){
             try {
                 await checkDeviceSecurity()
-                setTimeout(()=>isLoading(false),1000)
+                setTimeout(()=>isLoading(false),timeout)
             } catch (error) {
-                setError('Something went wrong.Restart Application')                
+                setError('Something went wrong')                
             }
         }
-        checkSecurity()
+        init && checkSecurity()
     },[])
     return (
         
@@ -24,7 +27,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({isLoading}) => {
             {error && <FadingContainer message={error} timeout={4000} errFn={setError}/>}
             <Image source={require('../assets/icon.png')} style={styles.logo} resizeMode="contain" />
             <ActivityIndicator size="large" color="#0000ff" />
-            <Text style={styles.loadingText}>Checking device security...</Text> 
+            <Text style={styles.loadingText}>{customMessage}</Text> 
         </View>
     );
 };

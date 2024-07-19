@@ -121,7 +121,7 @@ const ViewPassword: React.FC<Props> = ({ navigation ,route}) => {
 
     return (
         <View style={styles.container}>
-            {loading && <LoadingScreen isLoading={setIsLoading}/>}
+            {loading && <LoadingScreen isLoading={setIsLoading} init={false} customMessage={'Loading'} />}
             {info && <FadingContainer message={info} timeout={5000} errFn={setInfo} containerStyle={{backgroundColor:'green'}}/>}
             {error && <FadingContainer message={error} timeout={5000} errFn={setError}/>}
             {!loading && <>

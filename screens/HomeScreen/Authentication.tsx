@@ -118,7 +118,7 @@ const AuthenticationScreen: React.FC<Props> = ({navigation}) => {
                             <Text style={styles.buttonText}>USE BIOMETRICS</Text>
                         </TouchableOpacity>
                         <Text style={styles.or}>OR</Text>
-                        <TextInput style={{...styles.input, marginBottom:20,width:310}} placeholder="Enter Master Password" secureTextEntry value={password} onChangeText={setPassword} />
+                        <TextInput style={{...styles.input, marginBottom:20}} placeholder="Enter Master Password" secureTextEntry value={password} onChangeText={setPassword} />
                         <TouchableOpacity style={styles.button} onPress={handlePasswordAuth}>
                             <Text style={styles.buttonText}>Authenticate with Master Password</Text>
                         </TouchableOpacity>
